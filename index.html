@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sprintifer">
+<meta name="theme-color" content="#04080f">
+<title>Sprintifer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Mono:wght@400;500&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:          #04080f;
+  --bg2:         #070d18;
+  --surface:     #0b1221;
+  --surface2:    #111d2e;
+  --surface3:    #16253d;
+  --border:      rgba(59,130,246,0.12);
+  --border2:     rgba(59,130,246,0.22);
+  --text:        #e8edf5;
+  --text2:       #8fa3bf;
+  --text3:       #4d6480;
+  --blue:        #3b82f6;
+  --blue-light:  #60a5fa;
+  --blue-bright: #93c5fd;
+  --gold:        #c9a96e;
+  --gold-light:  #e0c99a;
+  --vitesse:     #3b82f6;
+  --vitesse-bg:  rgba(59,130,246,0.08);
+  --endurance:   #06b6d4;
+  --endurance-bg:rgba(6,182,212,0.08);
+  --mixte:       #8b5cf6;
+  --mixte-bg:    rgba(139,92,246,0.08);
+  --compet:      #c9a96e;
+  --compet-bg:   rgba(201,169,110,0.08);
+  --safe-top:    env(safe-area-inset-top, 44px);
+  --safe-bottom: env(safe-area-inset-bottom, 20px);
+  --r:           14px;
+  --r-sm:        8px;
+  --shadow:      0 4px 24px rgba(0,0,0,0.5);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── SUBTLE GRID TEXTURE ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.app { display: flex; flex-direction: column; min-height: 100vh; position: relative; z-index: 1; }
+
+/* ── NAVBAR ── */
+.navbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(4,8,15,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: calc(var(--safe-top) + 6px) 18px 10px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 600;
+  letter-spacing: 0.04em; color: var(--text);
+}
+.logo em { font-style: italic; color: var(--blue-light); }
+.logo-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; color: var(--gold);
+  letter-spacing: 0.15em; text-transform: uppercase;
+  margin-top: -2px; display: block;
+}
+.week-chip {
+  display: flex; flex-direction: column; align-items: flex-end;
+  gap: 1px;
+}
+.week-chip-val {
+  font-family: 'DM Mono', monospace; font-size: 13px; color: var(--blue-light);
+}
+.week-chip-lbl { font-size: 10px; color: var(--text3); }
+
+/* ── TABS ── */
+.tabs {
+  display: flex; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto; scrollbar-width: none; flex-shrink: 0;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: 1; min-width: 72px; padding: 11px 6px;
+  text-align: center; font-size: 11px; font-weight: 600;
+  color: var(--text3); cursor: pointer; white-space: nowrap;
+  border-bottom: 2px solid transparent; transition: all 0.2s;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.tab.active { color: var(--blue-light); border-bottom-color: var(--blue); }
+
+/* ── CONTENT ── */
+.content { flex: 1; overflow-y: auto; padding-bottom: calc(var(--safe-bottom) + 24px); }
+.page { display: none; padding: 18px; animation: fadeIn 0.2s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 16px; margin-bottom: 14px;
+}
+.card-title {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em;
+  margin-bottom: 12px;
+}
+
+/* ── HERO STATS ── */
+.hero {
+  background: linear-gradient(135deg, var(--surface) 0%, #0d1a2d 100%);
+  border: 1px solid var(--border2);
+  border-radius: var(--r); padding: 18px; margin-bottom: 14px;
+  position: relative; overflow: hidden;
+}
+.hero::after {
+  content: 'X';
+  position: absolute; right: -8px; bottom: -20px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 110px; font-weight: 700;
+  color: rgba(59,130,246,0.04); pointer-events: none;
+  line-height: 1;
+}
+.hero-label { font-size: 11px; color: var(--text3); margin-bottom: 14px; letter-spacing: 0.06em; text-transform: uppercase; }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+.stat { text-align: center; padding: 0 4px; position: relative; }
+.stat + .stat::before { content:''; position:absolute; left:0; top:10%; bottom:10%; width:1px; background: var(--border); }
+.stat-val { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: var(--blue-light); }
+.stat-lbl { font-size: 10px; color: var(--text3); margin-top: 3px; letter-spacing: 0.05em; }
+
+/* ── POLYTECHNIQUE BANNER ── */
+.x-banner {
+  background: linear-gradient(90deg, #0b1221 0%, #0d1a2d 50%, #0b1221 100%);
+  border: 1px solid rgba(201,169,110,0.2);
+  border-radius: var(--r); padding: 12px 16px; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.x-emblem {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px; font-weight: 700; color: var(--gold);
+  line-height: 1; flex-shrink: 0;
+}
+.x-text { flex: 1; }
+.x-title { font-size: 12px; font-weight: 600; color: var(--gold-light); letter-spacing: 0.06em; }
+.x-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.x-countdown {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--gold); text-align: right; flex-shrink: 0;
+}
+.x-countdown-lbl { font-size: 9px; color: var(--text3); text-align: right; margin-top: 2px; }
+
+/* ── PHASES ROADMAP ── */
+.phases-title { font-size: 11px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+.phases-roadmap { display: flex; flex-direction: column; gap: 0; margin-bottom: 14px; }
+.phase-step {
+  display: flex; gap: 14px; position: relative; cursor: pointer;
+}
+.phase-step:not(:last-child) .phase-line { position: absolute; left: 17px; top: 36px; bottom: 0; width: 1px; background: var(--border); }
+.phase-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+.phase-dot {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 700;
+  color: var(--text3); background: var(--surface); z-index: 1; flex-shrink: 0;
+  transition: all 0.3s;
+}
+.phase-step.active-phase .phase-dot {
+  border-color: var(--blue); color: var(--blue-light);
+  background: rgba(59,130,246,0.12);
+  box-shadow: 0 0 16px rgba(59,130,246,0.2);
+}
+.phase-step.done-phase .phase-dot {
+  border-color: rgba(59,130,246,0.3); background: rgba(59,130,246,0.05);
+  color: var(--blue);
+}
+.phase-step.future-phase .phase-dot { opacity: 0.4; }
+.phase-right { flex: 1; padding: 0 0 20px; }
+.phase-right-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; padding-top: 6px; }
+.phase-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.phase-step.future-phase .phase-name { color: var(--text3); }
+.phase-weeks-chip {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--text3); background: var(--surface2);
+  padding: 2px 8px; border-radius: 20px; white-space: nowrap;
+}
+.phase-step.active-phase .phase-weeks-chip { color: var(--blue-light); background: rgba(59,130,246,0.1); }
+.phase-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+.phase-step.active-phase .phase-desc { color: var(--text2); }
+.phase-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.phase-tag {
+  font-size: 10px; padding: 2px 8px; border-radius: 20px;
+  border: 1px solid; font-weight: 500;
+}
+
+/* ── PROG CARD ── */
+.prog-seances { display: flex; flex-direction: column; gap: 8px; }
+.prog-seance {
+  border-left: 2px solid; padding: 10px 12px;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--surface2);
+}
+.prog-seance.vitesse { border-color: var(--vitesse); }
+.prog-seance.endurance { border-color: var(--endurance); }
+.prog-seance.mixte { border-color: var(--mixte); }
+.prog-seance.compet { border-color: var(--compet); }
+.prog-seance-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.prog-seance-title { font-size: 13px; font-weight: 600; }
+.prog-seance.vitesse .prog-seance-title { color: var(--blue-light); }
+.prog-seance.endurance .prog-seance-title { color: var(--endurance); }
+.prog-seance.mixte .prog-seance-title { color: var(--mixte); }
+.prog-seance.compet .prog-seance-title { color: var(--gold-light); }
+.prog-day-chip {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--text3); background: var(--surface3);
+  padding: 1px 7px; border-radius: 20px;
+}
+.prog-seance-items { list-style: none; }
+.prog-seance-items li {
+  font-size: 11px; color: var(--text2); padding: 1px 0;
+  display: flex; align-items: flex-start; gap: 6px; line-height: 1.4;
+}
+.prog-seance-items li::before {
+  content: '—'; color: var(--text3); flex-shrink: 0; margin-top: 0px;
+}
+
+/* ── SESSION CARDS ── */
+.section-label {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+.session-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.session-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 13px 15px;
+  position: relative; overflow: hidden; cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.session-card:active { transform: scale(0.99); }
+.session-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+}
+.session-card.vitesse::before { background: var(--vitesse); }
+.session-card.endurance::before { background: var(--endurance); }
+.session-card.mixte::before { background: var(--mixte); }
+.session-card.compet::before { background: var(--compet); }
+.session-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.session-name { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+.session-date-time {
+  font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); text-align: right; flex-shrink: 0;
+}
+.session-tag {
+  display: inline-block; font-size: 9px; font-weight: 600;
+  padding: 2px 8px; border-radius: 20px; margin-top: 5px; letter-spacing: 0.05em; text-transform: uppercase;
+  border: 1px solid;
+}
+.tag-vitesse { color: var(--vitesse); border-color: rgba(59,130,246,0.3); background: var(--vitesse-bg); }
+.tag-endurance { color: var(--endurance); border-color: rgba(6,182,212,0.3); background: var(--endurance-bg); }
+.tag-mixte { color: var(--mixte); border-color: rgba(139,92,246,0.3); background: var(--mixte-bg); }
+.tag-compet { color: var(--gold); border-color: rgba(201,169,110,0.3); background: var(--compet-bg); }
+.session-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.session-meta-item { font-size: 11px; color: var(--text2); display: flex; align-items: center; gap: 4px; }
+.session-meta-item svg { opacity: 0.5; }
+.session-exercices { font-size: 11px; color: var(--text3); margin-top: 6px; font-style: italic; line-height: 1.4; }
+.session-notes { font-size: 11px; color: var(--text3); margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--border); line-height: 1.4; }
+.effort-row { display: flex; gap: 3px; margin-top: 8px; }
+.effort-pip {
+  flex: 1; height: 3px; border-radius: 2px; background: var(--surface3);
+  transition: background 0.15s;
+}
+
+/* ── ADD SESSION FORM ── */
+.form-section { margin-bottom: 20px; }
+.form-section-title {
+  font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.form-section-title::after { content:''; flex: 1; height: 1px; background: var(--border); }
+.form-group { margin-bottom: 12px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 5px; font-weight: 500; letter-spacing: 0.03em; }
+input, select, textarea {
+  width: 100%; padding: 11px 13px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text); border-radius: var(--r-sm);
+  font-family: 'Barlow', sans-serif; font-size: 14px;
+  appearance: none; -webkit-appearance: none;
+  transition: border-color 0.2s;
+}
+input::placeholder { color: var(--text3); }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); }
+select option { background: #0b1221; color: var(--text); }
+textarea { resize: none; height: 72px; line-height: 1.5; }
+
+.type-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.type-btn {
+  padding: 11px 8px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--text3); font-family: 'Barlow', sans-serif;
+  font-size: 12px; font-weight: 600; cursor: pointer; text-align: center;
+  transition: all 0.2s; letter-spacing: 0.02em;
+}
+.type-btn:active { opacity: 0.7; }
+.type-btn.sel-vitesse { border-color: var(--vitesse); color: var(--blue-light); background: var(--vitesse-bg); }
+.type-btn.sel-endurance { border-color: var(--endurance); color: var(--endurance); background: var(--endurance-bg); }
+.type-btn.sel-mixte { border-color: var(--mixte); color: var(--mixte); background: var(--mixte-bg); }
+.type-btn.sel-compet { border-color: var(--compet); color: var(--gold-light); background: var(--compet-bg); }
+
+.effort-selector { display: flex; gap: 5px; }
+.effort-btn {
+  flex: 1; padding: 9px 2px;
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--text3); font-family: 'DM Mono', monospace;
+  font-size: 12px; cursor: pointer; border-radius: 6px;
+  transition: all 0.2s; text-align: center;
+}
+.effort-btn.sel { background: var(--blue); color: white; border-color: var(--blue); font-weight: 500; }
+
+/* Exercices builder */
+.exo-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.exo-row { display: grid; grid-template-columns: 1fr 60px 70px 36px; gap: 6px; align-items: center; }
+.exo-row input { margin: 0; padding: 8px 10px; font-size: 13px; }
+.exo-del {
+  background: var(--surface3); border: 1px solid var(--border);
+  color: var(--text3); border-radius: 6px; padding: 8px;
+  cursor: pointer; font-size: 14px; text-align: center;
+}
+.add-exo-btn {
+  width: 100%; padding: 9px;
+  background: transparent; border: 1px dashed var(--border2);
+  color: var(--text3); font-family: 'Barlow', sans-serif; font-size: 12px;
+  border-radius: var(--r-sm); cursor: pointer; transition: all 0.2s;
+}
+.add-exo-btn:hover { border-color: var(--blue); color: var(--blue-light); }
+
+.submit-btn {
+  width: 100%; padding: 15px;
+  background: var(--blue); color: white;
+  border: none; border-radius: var(--r);
+  font-family: 'Barlow', sans-serif; font-size: 15px; font-weight: 700;
+  cursor: pointer; margin-top: 6px;
+  transition: opacity 0.15s, transform 0.15s;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.submit-btn:active { opacity: 0.85; transform: scale(0.99); }
+
+/* ── CALENDAR ── */
+.cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.cal-nav {
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text); padding: 7px 14px; border-radius: 8px;
+  font-size: 16px; cursor: pointer;
+}
+.cal-month { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.cal-day-hdr { text-align: center; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); padding: 4px 0; }
+.cal-day {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: 12px;
+  border-radius: 7px; cursor: pointer; transition: all 0.15s; color: var(--text3);
+}
+.cal-day.cur { color: var(--text); }
+.cal-day.vitesse { background: var(--vitesse-bg); color: var(--blue-light); font-weight: 500; }
+.cal-day.endurance { background: var(--endurance-bg); color: var(--endurance); font-weight: 500; }
+.cal-day.mixte { background: var(--mixte-bg); color: var(--mixte); font-weight: 500; }
+.cal-day.compet { background: var(--compet-bg); color: var(--gold); font-weight: 500; }
+.cal-day.today { outline: 1px solid var(--blue); outline-offset: -1px; }
+.cal-day.other { opacity: 0.2; }
+.cal-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; }
+.cal-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text3); }
+.cal-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+/* ── STATS ── */
+.bar-chart { display: flex; align-items: flex-end; gap: 5px; height: 90px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+.bar {
+  width: 100%; border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, var(--blue-light) 0%, var(--blue) 100%);
+  transition: height 0.4s ease;
+}
+.bar-lbl { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text3); }
+.distrib-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+.distrib-item {
+  padding: 14px 12px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); background: var(--surface);
+}
+.distrib-val { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; }
+.distrib-lbl { font-size: 11px; margin-top: 3px; color: var(--text3); }
+.pr-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 11px 0; border-bottom: 1px solid var(--border);
+}
+.pr-row:last-child { border-bottom: none; }
+.pr-name { font-size: 13px; font-weight: 500; }
+.pr-input {
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--blue-light); padding: 6px 10px; border-radius: 6px;
+  font-family: 'DM Mono', monospace; font-size: 14px; width: 110px; text-align: center;
+}
+
+/* ── REMINDERS ── */
+.notif-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 13px 15px; margin-bottom: 8px;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.notif-accent { width: 2px; height: 100%; border-radius: 2px; flex-shrink: 0; align-self: stretch; }
+.notif-body { flex: 1; }
+.notif-title { font-size: 13px; font-weight: 600; }
+.notif-sub { font-size: 11px; color: var(--text3); margin-top: 3px; line-height: 1.4; }
+.notif-time { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); margin-top: 5px; }
+.toggle { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0; background: var(--surface3);
+  border-radius: 12px; border: 1px solid var(--border2); cursor: pointer; transition: background 0.2s;
+}
+.toggle-slider::after {
+  content: ''; position: absolute;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--text3); top: 2px; left: 2px; transition: all 0.2s;
+}
+.toggle input:checked + .toggle-slider { background: var(--blue); border-color: var(--blue); }
+.toggle input:checked + .toggle-slider::after { transform: translateX(18px); background: white; }
+
+/* ── EMPTY / TOAST / UTIL ── */
+.empty { text-align: center; padding: 40px 20px; color: var(--text3); }
+.empty-icon { font-size: 36px; margin-bottom: 10px; opacity: 0.5; }
+.empty-text { font-size: 13px; line-height: 1.6; }
+.toast {
+  position: fixed; bottom: calc(var(--safe-bottom) + 24px); left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--blue); color: white;
+  padding: 11px 22px; border-radius: 30px;
+  font-size: 13px; font-weight: 600; z-index: 9999;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  white-space: nowrap; letter-spacing: 0.03em;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div>
+      <div class="logo">Sprint<em>ifer</em></div>
+      <div class="logo-sub">Prépa Concours X</div>
+    </div>
+    <div class="week-chip">
+      <div class="week-chip-val" id="week-chip-val">S1/18</div>
+      <div class="week-chip-lbl">programme</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" onclick="showPage('home',this)">Accueil</div>
+    <div class="tab" onclick="showPage('add',this)">+ Séance</div>
+    <div class="tab" onclick="showPage('programme',this)">Programme</div>
+    <div class="tab" onclick="showPage('calendar',this)">Calendrier</div>
+    <div class="tab" onclick="showPage('stats',this)">Stats</div>
+    <div class="tab" onclick="showPage('reminders',this)">Rappels</div>
+  </div>
+
+  <div class="content">
+
+    <!-- ===== HOME ===== -->
+    <div class="page active" id="page-home">
+
+      <div class="x-banner">
+        <div class="x-emblem">𝕏</div>
+        <div class="x-text">
+          <div class="x-title">Concours Polytechnique</div>
+          <div class="x-sub">100m · 1000m · Excellence</div>
+        </div>
+        <div>
+          <div class="x-countdown" id="x-days">— j</div>
+          <div class="x-countdown-lbl">avant l'épreuve</div>
+        </div>
+      </div>
+
+      <div class="hero">
+        <div class="hero-label">Semaine en cours</div>
+        <div class="stats-grid">
+          <div class="stat">
+            <div class="stat-val" id="stat-week-sess">0</div>
+            <div class="stat-lbl">séances</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val" id="stat-week-time">0h</div>
+            <div class="stat-lbl">volume</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val" id="stat-total">0</div>
+            <div class="stat-lbl">total</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Séances cette semaine</div>
+      <div id="prog-week-card" style="margin-bottom:14px;"></div>
+
+      <div class="section-label">Dernières séances</div>
+      <div class="session-list" id="recent-list"></div>
+    </div>
+
+    <!-- ===== ADD ===== -->
+    <div class="page" id="page-add">
+
+      <div class="form-section">
+        <div class="form-section-title">Type de séance</div>
+        <div class="type-grid">
+          <button class="type-btn" data-type="vitesse" onclick="selType('vitesse',this)">⚡ Vitesse / Sprint</button>
+          <button class="type-btn" data-type="endurance" onclick="selType('endurance',this)">🫁 Endurance</button>
+          <button class="type-btn" data-type="mixte" onclick="selType('mixte',this)">💪 Puissance mixte</button>
+          <button class="type-btn" data-type="compet" onclick="selType('compet',this)">🏅 Simulation X</button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Informations</div>
+        <div class="form-group">
+          <label>Titre de la séance</label>
+          <input type="text" id="f-title" placeholder="Ex : Sprints 30m + gammes ABC" />
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="margin:0">
+            <label>Date</label>
+            <input type="date" id="f-date" />
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Heure de début</label>
+            <input type="time" id="f-heure" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="margin:0">
+            <label>Durée (min)</label>
+            <input type="number" id="f-duree" placeholder="60" min="1" max="300" />
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Lieu</label>
+            <input type="text" id="f-lieu" placeholder="Piste, parc..." />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Météo / conditions</label>
+          <select id="f-meteo">
+            <option value="">— Sélectionner —</option>
+            <option>☀️ Ensoleillé</option>
+            <option>⛅ Nuageux</option>
+            <option>🌧 Pluie</option>
+            <option>🌬 Vent fort</option>
+            <option>🥵 Forte chaleur</option>
+            <option>🥶 Grand froid</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Exercices</div>
+        <div class="exo-list" id="exo-list"></div>
+        <button class="add-exo-btn" onclick="addExoRow()">+ Ajouter un exercice</button>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Ressenti</div>
+        <div class="form-group">
+          <label>Effort perçu (1–10)</label>
+          <div class="effort-selector" id="effort-selector"></div>
+        </div>
+        <div class="form-group">
+          <label>Fréquence cardiaque max (bpm)</label>
+          <input type="number" id="f-fc" placeholder="Ex : 178" min="100" max="220" />
+        </div>
+        <div class="form-group">
+          <label>Notes libres</label>
+          <textarea id="f-notes" placeholder="Ressentis, observations, points à travailler..."></textarea>
+        </div>
+      </div>
+
+      <button class="submit-btn" onclick="saveSession()">Enregistrer la séance</button>
+    </div>
+
+    <!-- ===== PROGRAMME ===== -->
+    <div class="page" id="page-programme">
+
+      <div class="x-banner" style="margin-bottom:18px;">
+        <div class="x-emblem" style="font-size:22px;">⚔</div>
+        <div class="x-text">
+          <div class="x-title">Programme 18 semaines</div>
+          <div class="x-sub">Prépa spécifique 100m & 1000m</div>
+        </div>
+      </div>
+
+      <div class="phases-title">Parcours de progression</div>
+      <div class="phases-roadmap" id="phases-roadmap"></div>
+
+      <div class="section-label" style="margin-top:4px;">Séances détaillées — Semaine actuelle</div>
+      <div id="prog-detail-current"></div>
+
+    </div>
+
+    <!-- ===== CALENDAR ===== -->
+    <div class="page" id="page-calendar">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+        <div class="cal-month" id="cal-month-title"></div>
+        <button class="cal-nav" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--vitesse)"></div>Vitesse</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--endurance)"></div>Endurance</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--mixte)"></div>Puissance</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--compet)"></div>Simulation</div>
+      </div>
+      <div style="margin-top:20px;">
+        <div class="section-label">Séances du mois</div>
+        <div class="session-list" id="cal-session-list"></div>
+      </div>
+    </div>
+
+    <!-- ===== STATS ===== -->
+    <div class="page" id="page-stats">
+      <div class="card">
+        <div class="card-title">Volume hebdomadaire (min)</div>
+        <div class="bar-chart" id="bar-chart"></div>
+      </div>
+      <div class="section-label">Répartition des séances</div>
+      <div class="distrib-grid" id="distrib-grid"></div>
+      <div class="card">
+        <div class="card-title">Records personnels</div>
+        <div class="pr-row">
+          <div class="pr-name">100 mètres</div>
+          <input class="pr-input" id="pr-100" type="text" placeholder="-- s" onchange="savePR('100',this.value)" />
+        </div>
+        <div class="pr-row">
+          <div class="pr-name">1 000 mètres</div>
+          <input class="pr-input" id="pr-1000" type="text" placeholder="--:--" onchange="savePR('1000',this.value)" />
+        </div>
+        <div class="pr-row">
+          <div class="pr-name">FC repos</div>
+          <input class="pr-input" id="pr-fc" type="text" placeholder="-- bpm" onchange="savePR('fc',this.value)" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== REMINDERS ===== -->
+    <div class="page" id="page-reminders">
+      <div class="section-label">Rappels programme</div>
+      <div id="notif-list"></div>
+      <div class="section-label" style="margin-top:18px;">Date de l'épreuve</div>
+      <div class="card">
+        <div class="form-group" style="margin:0">
+          <label>Date des épreuves sportives (concours X)</label>
+          <input type="date" id="x-date-input" onchange="saveXDate(this.value)" />
+        </div>
+      </div>
+      <div class="section-label" style="margin-top:4px;">Date de début du programme</div>
+      <div class="card">
+        <div class="form-group" style="margin:0">
+          <label>1ère semaine de préparation</label>
+          <input type="date" id="start-date-input" onchange="saveStartDate(this.value)" />
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══ DATA ══ */
+const PHASES = [
+  {
+    id:1, num:'I', name:'Fondations aérobie & initiation sprint',
+    weeks:[1,6],
+    desc:'Construction du moteur aérobie, apprentissage des gammes de sprint, initiation au gainage dynamique. Aucune intensité maximale — qualité technique avant tout.',
+    tags:[{l:'Technique sprint',c:'--vitesse'},{l:'Aérobie de base',c:'--endurance'},{l:'Gainage',c:'--mixte'}],
+    seances:[
+      {
+        type:'vitesse', title:'Séance A — Vitesse & Technique',
+        day:'Lundi / Mardi',
+        items:[
+          'Échauffement 20 min : montées de genoux, talons-fesses, gammes ABC, foulées bondissantes',
+          '6 × 30m en accélération progressive (80 → 90% intensité) — récup 3 min marchée',
+          '4 × 20m départ arrêté — focus poussée initiale et inclinaison',
+          'Gainage dynamique 15 min : planche, gainage latéral, pont fessier, superman'
+        ]
+      },
+      {
+        type:'endurance', title:'Séance B — Endurance fondamentale',
+        day:'Jeudi / Vendredi',
+        items:[
+          'Footing continu 30–35 min à allure conversation (65–70% FCmax)',
+          '5 × 200m à allure 1000m cible — récup 90 sec trottée douce',
+          'Retour au calme 15 min : étirements actifs, respiration abdominale'
+        ]
+      }
+    ]
+  },
+  {
+    id:2, num:'II', name:'Développement puissance & volume',
+    weeks:[7,12],
+    desc:'Intensification progressive. Travail en côte, plyométrie, répétitions longues. Les deux filières sont développées simultanément avec montée en charge contrôlée.',
+    tags:[{l:'Côtes & plyométrie',c:'--mixte'},{l:'VMA 200m',c:'--endurance'},{l:'Répétitions 80m',c:'--vitesse'}],
+    seances:[
+      {
+        type:'mixte', title:'Séance A — Puissance & Sprint',
+        day:'Lundi / Mardi',
+        items:[
+          'Échauffement complet 20 min avec gammes et 3 × 50m relâchés',
+          '6 × 40m en côte légère (5%) — récup complète 4 min, focus poussée horizontale',
+          '4 × 60m plat à 95% — récup 5 min, chrono chaque répétition',
+          '4 × 80m résistance (élastique ou partenaire) — récup 5 min',
+          'Plyométrie 15 min : sauts à la corde, bonds alternés, sauts en longueur pieds joints'
+        ]
+      },
+      {
+        type:'endurance', title:'Séance B — Spécifique 1000m',
+        day:'Jeudi / Vendredi',
+        items:[
+          'Footing progressif 20 min (5 dernières minutes à 80% FCmax)',
+          '8 × 200m à allure VMA — récup 60 sec trottée. Objectif : chrono identique sur chaque répétition',
+          '1 × 600m effort contrôlé à 90% — uniquement en fin de phase (semaine 11–12)',
+          'Récupération active 10 min + étirements ciblés mollets et quadriceps'
+        ]
+      }
+    ]
+  },
+  {
+    id:3, num:'III', name:'Affûtage & simulation compétition',
+    weeks:[13,18],
+    desc:'Qualité maximale, volume réduit. Simulations en conditions réelles, départs travaillés, gestion mentale de l\'effort. Les deux dernières semaines sont dédiées à l\'affûtage.',
+    tags:[{l:'Sprint maximal',c:'--vitesse'},{l:'Simulation 1000m',c:'--compet'},{l:'Affûtage S17–18',c:'--gold'}],
+    seances:[
+      {
+        type:'compet', title:'Séance A — Sprint maximal',
+        day:'Lundi / Mardi',
+        items:[
+          'Échauffement long 25 min avec gammes, accélérations progressives et exercices de réactivité',
+          '8 × départ arrêté sur 20m — focus réaction et explosivité initiale',
+          '2 × 100m à intensité maximale — récup complète 8–10 min. Chrono et analyse vidéo si possible',
+          '3 × 50m sprint relâché — apprendre à courir vite sans crispation',
+          'Semaines 17–18 : volume divisé par 2, intensité maintenue. Priorité sommeil et nutrition'
+        ]
+      },
+      {
+        type:'compet', title:'Séance B — Simulation 1000m',
+        day:'Jeudi / Vendredi',
+        items:[
+          'Footing activation 15 min + gammes légères',
+          '2 × 500m à allure objectif 1000m — maîtriser le rythme cible, récup 5 min entre les 2',
+          '1 × 1000m à intensité compétition (semaine 16 uniquement) — analyse de la gestion d\'allure',
+          'Travail mental : visualisation de la course, gestion du départ et du dernier 200m'
+        ]
+      }
+    ]
+  }
+];
+
+const NOTIFS_CFG = [
+  {id:'lundi-a', day:'Lundi', time:'07:00', title:'Séance A — Vitesse', sub:'Sprint & technique · N\'oublie pas tes pointes', type:'vitesse'},
+  {id:'veille-a', day:'Dimanche', time:'21:00', title:'Demain : Séance A', sub:'Prépare ton équipement et dors bien', type:'vitesse'},
+  {id:'jeudi-b', day:'Jeudi', time:'07:00', title:'Séance B — Endurance', sub:'Footing + fractionné 200m', type:'endurance'},
+  {id:'veille-b', day:'Mercredi', time:'21:00', title:'Demain : Séance B', sub:'Allure tranquille demain, récupère bien', type:'endurance'},
+  {id:'hebdo', day:'Dimanche', time:'18:00', title:'Bilan de la semaine', sub:'Enregistre tes ressentis et ajuste le programme', type:'mixte'},
+];
+
+let sessions = JSON.parse(localStorage.getItem('sprintifer-sessions') || '[]');
+let prs = JSON.parse(localStorage.getItem('sprintifer-prs') || '{}');
+let selectedType = '';
+let selectedEffort = 0;
+let exoRows = [];
+let calDate = new Date();
+
+function getStartDate() {
+  const s = localStorage.getItem('sprintifer-start');
+  return s ? new Date(s) : new Date();
+}
+function getXDate() {
+  const s = localStorage.getItem('sprintifer-xdate');
+  return s ? new Date(s) : null;
+}
+function saveXDate(v) {
+  localStorage.setItem('sprintifer-xdate', v);
+  renderXBanner();
+  showToast('Date de l\'épreuve enregistrée');
+}
+function saveStartDate(v) {
+  localStorage.setItem('sprintifer-start', v);
+  renderHome();
+  showToast('Date de début enregistrée');
+}
+
+function getCurrentWeek() {
+  const start = getStartDate();
+  const now = new Date(); now.setHours(0,0,0,0);
+  const diff = Math.floor((now - start) / (7*24*3600*1000));
+  return Math.min(Math.max(diff + 1, 1), 18);
+}
+function getCurrentPhase(week) {
+  return PHASES.find(p => week >= p.weeks[0] && week <= p.weeks[1]) || PHASES[0];
+}
+
+/* ── PAGES ── */
+function showPage(id, tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (tab) tab.classList.add('active');
+  const renders = {home:renderHome, calendar:renderCalendar, stats:renderStats, reminders:renderReminders, programme:renderProgramme};
+  if (renders[id]) renders[id]();
+}
+
+/* ── HOME ── */
+function renderHome() {
+  const week = getCurrentWeek();
+  document.getElementById('week-chip-val').textContent = 'S' + week + '/18';
+  renderXBanner();
+  const now = new Date();
+  const wStart = new Date(now); wStart.setDate(now.getDate() - ((now.getDay()+6)%7));
+  wStart.setHours(0,0,0,0);
+  const wEnd = new Date(wStart); wEnd.setDate(wStart.getDate() + 6); wEnd.setHours(23,59,59,999);
+  const wSess = sessions.filter(s => { const d = new Date(s.date); return d >= wStart && d <= wEnd; });
+  document.getElementById('stat-week-sess').textContent = wSess.length;
+  const mins = wSess.reduce((a,s) => a + (parseInt(s.duree)||0), 0);
+  document.getElementById('stat-week-time').textContent = mins >= 60 ? Math.floor(mins/60) + 'h' + (mins%60 ? (mins%60)+'m':'') : mins + 'min';
+  document.getElementById('stat-total').textContent = sessions.length;
+  renderProgWeek(week);
+  const list = document.getElementById('recent-list');
+  const recent = [...sessions].sort((a,b) => new Date(b.date+' '+(b.heure||'00:00')) - new Date(a.date+' '+(a.heure||'00:00'))).slice(0,5);
+  list.innerHTML = recent.length ? recent.map(s => sessionCardHTML(s)).join('') :
+    '<div class="empty"><div class="empty-icon">🏁</div><div class="empty-text">Aucune séance enregistrée.<br>La route vers l\'X commence maintenant.</div></div>';
+}
+
+function renderXBanner() {
+  const xd = getXDate();
+  const el = document.getElementById('x-days');
+  if (xd) {
+    const diff = Math.ceil((xd - new Date()) / (24*3600*1000));
+    el.textContent = diff > 0 ? diff + ' j' : 'Aujourd\'hui !';
+  } else { el.textContent = '— j'; }
+}
+
+function renderProgWeek(week) {
+  const phase = getCurrentPhase(week);
+  const el = document.getElementById('prog-week-card');
+  el.innerHTML = `<div class="card" style="padding:14px 15px;">
+    <div class="card-title" style="margin-bottom:10px;">Programme S${week} · Phase ${phase.num} — ${phase.name.split(' ')[0]}</div>
+    <div class="prog-seances">${phase.seances.map(s => `
+      <div class="prog-seance ${s.type}">
+        <div class="prog-seance-header">
+          <div class="prog-seance-title">${s.title.split('—')[1]?.trim()||s.title}</div>
+          <div class="prog-day-chip">${s.day}</div>
+        </div>
+        <ul class="prog-seance-items">${s.items.slice(0,3).map(i => `<li>${i}</li>`).join('')}</ul>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ── PROGRAMME PAGE ── */
+function renderProgramme() {
+  const week = getCurrentWeek();
+  const roadmap = document.getElementById('phases-roadmap');
+  roadmap.innerHTML = PHASES.map((ph, idx) => {
+    const isActive = week >= ph.weeks[0] && week <= ph.weeks[1];
+    const isDone = week > ph.weeks[1];
+    const cls = isActive ? 'active-phase' : isDone ? 'done-phase' : 'future-phase';
+    const tagsHTML = ph.tags.map(t =>
+      `<span class="phase-tag" style="color:var(${t.c});border-color:color-mix(in srgb, var(${t.c}) 30%, transparent)">${t.l}</span>`
+    ).join('');
+    return `<div class="phase-step ${cls}">
+      <div class="phase-left">
+        <div class="phase-dot">${ph.num}</div>
+        <div class="phase-line"></div>
+      </div>
+      <div class="phase-right">
+        <div class="phase-right-header">
+          <div class="phase-name">${ph.name}</div>
+          <div class="phase-weeks-chip">S${ph.weeks[0]}–S${ph.weeks[1]}</div>
+        </div>
+        <div class="phase-desc">${ph.desc}</div>
+        <div class="phase-tags">${tagsHTML}${isActive ? '<span class="phase-tag" style="color:var(--blue-light);border-color:rgba(59,130,246,0.4);background:var(--vitesse-bg)">● En cours</span>' : ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const phase = getCurrentPhase(week);
+  const det = document.getElementById('prog-detail-current');
+  det.innerHTML = phase.seances.map(s => `
+    <div class="prog-seance ${s.type}" style="border-radius:var(--r-sm);margin-bottom:10px;padding:12px 14px;">
+      <div class="prog-seance-header">
+        <div class="prog-seance-title">${s.title}</div>
+        <div class="prog-day-chip">${s.day}</div>
+      </div>
+      <ul class="prog-seance-items" style="margin-top:8px;">${s.items.map(i=>`<li>${i}</li>`).join('')}</ul>
+    </div>`).join('');
+}
+
+/* ── SESSION CARD HTML ── */
+function sessionCardHTML(s) {
+  const d = new Date(s.date);
+  const dateStr = d.toLocaleDateString('fr-FR', {weekday:'short', day:'numeric', month:'short'});
+  const typeLabels = {vitesse:'Vitesse',endurance:'Endurance',mixte:'Puissance',compet:'Simulation X'};
+  const colors = {vitesse:'--vitesse',endurance:'--endurance',mixte:'--mixte',compet:'--compet'};
+  const pipHTML = s.effort ? Array.from({length:10}, (_,i) =>
+    `<div class="effort-pip" style="${i<s.effort?'background:var('+colors[s.type]+')':''}"></div>`
+  ).join('') : '';
+  const exoHTML = s.exercices && s.exercices.length ? `<div class="session-exercices">${s.exercices.map(e => e.nom + (e.series?' · '+e.series+(e.reps?' × '+e.reps:'')+(e.unite?' '+e.unite:''):'')).join(' &nbsp;·&nbsp; ')}</div>` : '';
+  return `<div class="session-card ${s.type}">
+    <div class="session-top">
+      <div style="flex:1">
+        <div class="session-name">${s.title}</div>
+        <span class="session-tag tag-${s.type}">${typeLabels[s.type]||s.type}</span>
+      </div>
+      <div class="session-date-time">${dateStr}${s.heure?'<br>'+s.heure:''}</div>
+    </div>
+    <div class="session-meta">
+      ${s.duree?`<div class="session-meta-item">⏱ <strong>${s.duree} min</strong></div>`:''}
+      ${s.lieu?`<div class="session-meta-item">📍 ${s.lieu}</div>`:''}
+      ${s.meteo?`<div class="session-meta-item">${s.meteo}</div>`:''}
+      ${s.fc?`<div class="session-meta-item">❤️ ${s.fc} bpm</div>`:''}
+    </div>
+    ${exoHTML}
+    ${pipHTML ? `<div class="effort-row">${pipHTML}</div>` : ''}
+    ${s.notes?`<div class="session-notes">${s.notes}</div>`:''}
+  </div>`;
+}
+
+/* ── ADD FORM ── */
+function selType(type, btn) {
+  selectedType = type;
+  document.querySelectorAll('.type-btn').forEach(b => { b.className = 'type-btn'; });
+  btn.className = 'type-btn sel-' + type;
+}
+
+function buildEffortSelector() {
+  document.getElementById('effort-selector').innerHTML = Array.from({length:10},(_,i) =>
+    `<button class="effort-btn" onclick="selEffort(${i+1},this)">${i+1}</button>`).join('');
+}
+function selEffort(v, btn) {
+  selectedEffort = v;
+  document.querySelectorAll('.effort-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+function addExoRow(nom='', series='', reps='', unite='m') {
+  const id = 'exo-' + Date.now() + Math.random().toString(36).slice(2,5);
+  exoRows.push(id);
+  const div = document.createElement('div');
+  div.className = 'exo-row'; div.id = id;
+  div.innerHTML = `
+    <input type="text" placeholder="Exercice" value="${nom}" />
+    <input type="text" placeholder="Séries" value="${series}" />
+    <input type="text" placeholder="Reps / dist." value="${reps}" />
+    <button class="exo-del" onclick="removeExoRow('${id}')">✕</button>`;
+  document.getElementById('exo-list').appendChild(div);
+}
+function removeExoRow(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+  exoRows = exoRows.filter(r => r !== id);
+}
+
+function saveSession() {
+  const title = document.getElementById('f-title').value.trim();
+  const date = document.getElementById('f-date').value;
+  if (!title || !date || !selectedType) { showToast('Remplis type, titre et date !'); return; }
+  const exercices = [...document.getElementById('exo-list').querySelectorAll('.exo-row')].map(row => {
+    const inputs = row.querySelectorAll('input');
+    return { nom: inputs[0].value, series: inputs[1].value, reps: inputs[2].value };
+  }).filter(e => e.nom);
+  const s = {
+    id: Date.now(),
+    type: selectedType,
+    title, date,
+    heure: document.getElementById('f-heure').value,
+    duree: document.getElementById('f-duree').value,
+    lieu: document.getElementById('f-lieu').value.trim(),
+    meteo: document.getElementById('f-meteo').value,
+    exercices,
+    effort: selectedEffort,
+    fc: document.getElementById('f-fc').value,
+    notes: document.getElementById('f-notes').value.trim()
+  };
+  sessions.unshift(s);
+  localStorage.setItem('sprintifer-sessions', JSON.stringify(sessions));
+  // reset
+  ['f-title','f-duree','f-lieu','f-fc','f-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('f-heure').value = '';
+  document.getElementById('f-meteo').selectedIndex = 0;
+  document.getElementById('exo-list').innerHTML = '';
+  exoRows = [];
+  selectedType = ''; selectedEffort = 0;
+  document.querySelectorAll('.type-btn').forEach(b => b.className = 'type-btn');
+  document.querySelectorAll('.effort-btn').forEach(b => b.classList.remove('sel'));
+  showToast('Séance enregistrée ✓');
+  showPage('home', document.querySelectorAll('.tab')[0]);
+}
+
+/* ── CALENDAR ── */
+function renderCalendar() {
+  const year = calDate.getFullYear();
+  const month = calDate.getMonth();
+  document.getElementById('cal-month-title').textContent =
+    calDate.toLocaleDateString('fr-FR',{month:'long',year:'numeric'}).replace(/^\w/,c=>c.toUpperCase());
+  const grid = document.getElementById('cal-grid');
+  const hdrDays = ['Lu','Ma','Me','Je','Ve','Sa','Di'];
+  let html = hdrDays.map(d => `<div class="cal-day-hdr">${d}</div>`).join('');
+  const firstDay = new Date(year,month,1).getDay();
+  const offset = firstDay === 0 ? 6 : firstDay - 1;
+  const daysInMonth = new Date(year,month+1,0).getDate();
+  const daysInPrev = new Date(year,month,0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const sMap = {};
+  sessions.forEach(s => { (sMap[s.date] = sMap[s.date]||[]).push(s); });
+  for (let i=0;i<offset;i++) html += `<div class="cal-day other">${daysInPrev-offset+1+i}</div>`;
+  for (let d=1;d<=daysInMonth;d++) {
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const ss = sMap[ds]||[];
+    const dd = new Date(year,month,d);
+    const isToday = dd.getTime()===today.getTime();
+    const type = ss.length ? ss[0].type : '';
+    const cls = ['cal-day',type,isToday?'today':'',ss.length?'cur':''].filter(Boolean).join(' ');
+    html += `<div class="${cls}">${d}</div>`;
+  }
+  grid.innerHTML = html;
+  const mSess = sessions.filter(s => { const d=new Date(s.date); return d.getFullYear()===year&&d.getMonth()===month; })
+    .sort((a,b) => new Date(b.date)-new Date(a.date));
+  document.getElementById('cal-session-list').innerHTML = mSess.length ?
+    mSess.map(s=>sessionCardHTML(s)).join('') :
+    '<div class="empty"><div class="empty-text">Aucune séance ce mois-ci</div></div>';
+}
+function changeMonth(dir) { calDate.setMonth(calDate.getMonth()+dir); renderCalendar(); }
+
+/* ── STATS ── */
+function renderStats() {
+  const now = new Date();
+  const bars = [];
+  for (let i=7;i>=0;i--) {
+    const ws = new Date(now); ws.setDate(now.getDate()-((now.getDay()+6)%7)-i*7); ws.setHours(0,0,0,0);
+    const we = new Date(ws); we.setDate(ws.getDate()+6); we.setHours(23,59,59,999);
+    const total = sessions.filter(s=>{const d=new Date(s.date);return d>=ws&&d<=we;}).reduce((a,s)=>a+(parseInt(s.duree)||0),0);
+    bars.push({l: i===0?'Curr':'S-'+i, v:total});
+  }
+  const maxV = Math.max(...bars.map(b=>b.v),1);
+  document.getElementById('bar-chart').innerHTML = bars.map(b=>`
+    <div class="bar-col">
+      <div class="bar" style="height:${Math.max(4,Math.round(b.v/maxV*100))}%;opacity:${b.v?'1':'0.15'}"></div>
+      <div class="bar-lbl">${b.l}</div>
+    </div>`).join('');
+  const counts = {vitesse:0,endurance:0,mixte:0,compet:0};
+  sessions.forEach(s=>{if(counts[s.type]!==undefined)counts[s.type]++;});
+  const colors = {vitesse:'--vitesse',endurance:'--endurance',mixte:'--mixte',compet:'--compet'};
+  const labels = {vitesse:'Vitesse',endurance:'Endurance',mixte:'Puissance',compet:'Simulation'};
+  document.getElementById('distrib-grid').innerHTML = Object.entries(counts).map(([type,cnt])=>`
+    <div class="distrib-item" style="border-color:color-mix(in srgb,var(${colors[type]}) 20%,transparent)">
+      <div class="distrib-val" style="color:var(${colors[type]})">${cnt}</div>
+      <div class="distrib-lbl">${labels[type]}</div>
+    </div>`).join('');
+  const p = JSON.parse(localStorage.getItem('sprintifer-prs')||'{}');
+  ['100','1000','fc'].forEach(k => { const el=document.getElementById('pr-'+k); if(el&&p[k]) el.value=p[k]; });
+}
+function savePR(k,v) {
+  const p=JSON.parse(localStorage.getItem('sprintifer-prs')||'{}');
+  p[k]=v; localStorage.setItem('sprintifer-prs',JSON.stringify(p));
+  showToast('Record enregistré');
+}
+
+/* ── REMINDERS ── */
+function renderReminders() {
+  const saved = JSON.parse(localStorage.getItem('sprintifer-notifs')||'{}');
+  const colors = {vitesse:'var(--vitesse)',endurance:'var(--endurance)',mixte:'var(--mixte)',compet:'var(--compet)'};
+  document.getElementById('notif-list').innerHTML = NOTIFS_CFG.map(n=>`
+    <div class="notif-card">
+      <div class="notif-accent" style="background:${colors[n.type]||'var(--blue)'}"></div>
+      <div class="notif-body">
+        <div class="notif-title">${n.title}</div>
+        <div class="notif-sub">${n.sub}</div>
+        <div class="notif-time">${n.day} · ${n.time}</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" ${saved[n.id]?'checked':''} onchange="toggleNotif('${n.id}',this.checked)"/>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>`).join('');
+  const xd = localStorage.getItem('sprintifer-xdate');
+  if (xd) document.getElementById('x-date-input').value = xd;
+  const sd = localStorage.getItem('sprintifer-start');
+  if (sd) document.getElementById('start-date-input').value = sd;
+}
+
+function toggleNotif(id, enabled) {
+  const saved=JSON.parse(localStorage.getItem('sprintifer-notifs')||'{}');
+  saved[id]=enabled; localStorage.setItem('sprintifer-notifs',JSON.stringify(saved));
+  if (enabled && 'Notification' in window) {
+    Notification.requestPermission().then(p => showToast(p==='granted'?'Rappel activé ✓':'Autorise les notifications dans Safari'));
+  } else { showToast('Rappel désactivé'); }
+}
+
+/* ── TOAST ── */
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+/* ── INIT ── */
+function init() {
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  buildEffortSelector();
+  addExoRow();
+  renderHome();
+}
+init();
+</script>
+</body>
+</html>
