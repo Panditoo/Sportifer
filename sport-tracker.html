@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sprint X">
+<meta name="theme-color" content="#0a0a0a">
+<title>Sprint X</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface2: #1e1e1e;
+  --border: rgba(255,255,255,0.08);
+  --text: #f0ede8;
+  --muted: #888;
+  --accent: #c8f542;
+  --vitesse: #ff6b35;
+  --vitesse-bg: rgba(255,107,53,0.12);
+  --endurance: #42d9a0;
+  --endurance-bg: rgba(66,217,160,0.12);
+  --mixte: #a78bfa;
+  --mixte-bg: rgba(167,139,250,0.12);
+  --compet: #fbbf24;
+  --compet-bg: rgba(251,191,36,0.12);
+  --safe-top: env(safe-area-inset-top, 44px);
+  --safe-bottom: env(safe-area-inset-bottom, 20px);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+.app { display: flex; flex-direction: column; min-height: 100vh; min-height: -webkit-fill-available; }
+
+/* NAV */
+.navbar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: calc(var(--safe-top) + 8px) 20px 12px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.logo { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: var(--text); }
+.logo span { color: var(--accent); }
+.week-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; color: var(--muted);
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 4px 10px; border-radius: 20px;
+}
+
+/* TABS */
+.tabs {
+  display: flex; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto; scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: 1; min-width: 80px; padding: 12px 8px;
+  text-align: center; font-size: 12px; font-weight: 500;
+  color: var(--muted); cursor: pointer; white-space: nowrap;
+  border-bottom: 2px solid transparent; transition: all 0.2s;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* CONTENT */
+.content { flex: 1; overflow-y: auto; padding-bottom: calc(var(--safe-bottom) + 20px); }
+.page { display: none; padding: 20px; }
+.page.active { display: block; }
+
+/* STATS HERO */
+.hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px; margin-bottom: 16px;
+}
+.hero-title { font-size: 13px; color: var(--muted); margin-bottom: 12px; font-weight: 400; }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.stat { text-align: center; }
+.stat-val { font-size: 24px; font-weight: 800; color: var(--accent); font-family: 'DM Mono', monospace; }
+.stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* PROGRAMME CARD */
+.prog-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 16px;
+}
+.prog-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.prog-title { font-size: 14px; font-weight: 700; }
+.prog-phase {
+  font-size: 11px; font-weight: 500;
+  padding: 3px 10px; border-radius: 20px;
+  background: rgba(200,245,66,0.12); color: var(--accent);
+}
+.prog-seances { display: flex; flex-direction: column; gap: 8px; }
+.prog-seance {
+  border-left: 3px solid; padding: 10px 12px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.prog-seance.vitesse { border-color: var(--vitesse); background: var(--vitesse-bg); }
+.prog-seance.endurance { border-color: var(--endurance); background: var(--endurance-bg); }
+.prog-seance.mixte { border-color: var(--mixte); background: var(--mixte-bg); }
+.prog-seance.compet { border-color: var(--compet); background: var(--compet-bg); }
+.prog-seance-title { font-size: 13px; font-weight: 700; }
+.prog-seance-detail { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+/* SESSION CARDS */
+.section-label {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 10px; margin-top: 4px;
+}
+.session-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.session-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px;
+  position: relative; overflow: hidden;
+  cursor: pointer; transition: border-color 0.2s;
+}
+.session-card:active { opacity: 0.8; }
+.session-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+.session-card.vitesse::before { background: var(--vitesse); }
+.session-card.endurance::before { background: var(--endurance); }
+.session-card.mixte::before { background: var(--mixte); }
+.session-card.compet::before { background: var(--compet); }
+.session-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.session-name { font-size: 14px; font-weight: 700; }
+.session-date { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.session-tag {
+  display: inline-block; font-size: 10px; font-weight: 500;
+  padding: 2px 8px; border-radius: 20px; margin-top: 5px;
+}
+.tag-vitesse { background: var(--vitesse-bg); color: var(--vitesse); }
+.tag-endurance { background: var(--endurance-bg); color: var(--endurance); }
+.tag-mixte { background: var(--mixte-bg); color: var(--mixte); }
+.tag-compet { background: var(--compet-bg); color: var(--compet); }
+.session-metrics { display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
+.session-metric { font-size: 12px; color: var(--muted); }
+.session-metric strong { color: var(--text); font-weight: 500; }
+.session-notes { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; line-height: 1.4; }
+.effort-bar { display: flex; gap: 3px; margin-top: 8px; }
+.effort-dot {
+  width: 14px; height: 6px; border-radius: 3px;
+  background: var(--surface2);
+  transition: background 0.2s;
+}
+
+/* ADD BUTTON */
+.add-btn {
+  display: block; width: 100%; padding: 16px;
+  background: var(--accent); color: #0a0a0a;
+  border: none; border-radius: var(--radius);
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 800;
+  cursor: pointer; margin-bottom: 20px;
+  transition: opacity 0.15s, transform 0.15s;
+  letter-spacing: 0.02em;
+}
+.add-btn:active { opacity: 0.85; transform: scale(0.99); }
+
+/* FORM */
+.form-group { margin-bottom: 16px; }
+label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+input, select, textarea {
+  width: 100%; padding: 12px 14px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); border-radius: var(--radius-sm);
+  font-family: 'Syne', sans-serif; font-size: 14px;
+  appearance: none; -webkit-appearance: none;
+  transition: border-color 0.2s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--accent);
+}
+select option { background: #1e1e1e; }
+textarea { resize: none; height: 80px; line-height: 1.5; }
+.type-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.type-btn {
+  padding: 12px 8px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 500; cursor: pointer; text-align: center;
+  transition: all 0.2s;
+}
+.type-btn.selected-vitesse { border-color: var(--vitesse); color: var(--vitesse); background: var(--vitesse-bg); }
+.type-btn.selected-endurance { border-color: var(--endurance); color: var(--endurance); background: var(--endurance-bg); }
+.type-btn.selected-mixte { border-color: var(--mixte); color: var(--mixte); background: var(--mixte-bg); }
+.type-btn.selected-compet { border-color: var(--compet); color: var(--compet); background: var(--compet-bg); }
+.effort-selector { display: flex; gap: 6px; }
+.effort-btn {
+  flex: 1; padding: 10px 4px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); font-family: 'DM Mono', monospace;
+  font-size: 13px; cursor: pointer; border-radius: 8px;
+  transition: all 0.2s; text-align: center;
+}
+.effort-btn.selected { background: var(--accent); color: #0a0a0a; border-color: var(--accent); font-weight: 500; }
+.submit-btn {
+  width: 100%; padding: 16px;
+  background: var(--accent); color: #0a0a0a;
+  border: none; border-radius: var(--radius);
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 800;
+  cursor: pointer; margin-top: 8px;
+  transition: opacity 0.15s;
+}
+.submit-btn:active { opacity: 0.85; }
+
+/* CALENDAR */
+.cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.cal-nav { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 8px; font-size: 14px; cursor: pointer; font-family: 'Syne', sans-serif; }
+.cal-month { font-size: 16px; font-weight: 700; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-day-header { text-align: center; font-size: 11px; color: var(--muted); padding: 4px 0; font-weight: 500; }
+.cal-day {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; border-radius: 8px; font-family: 'DM Mono', monospace;
+  cursor: pointer; position: relative; transition: all 0.15s;
+  color: var(--muted);
+}
+.cal-day.has-session { color: var(--text); font-weight: 500; }
+.cal-day.vitesse { background: var(--vitesse-bg); color: var(--vitesse); }
+.cal-day.endurance { background: var(--endurance-bg); color: var(--endurance); }
+.cal-day.mixte { background: var(--mixte-bg); color: var(--mixte); }
+.cal-day.compet { background: var(--compet-bg); color: var(--compet); }
+.cal-day.today { outline: 1px solid var(--accent); }
+.cal-day.other-month { opacity: 0.25; }
+.cal-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+.cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.cal-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+/* STATS PAGE */
+.chart-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 14px;
+}
+.chart-title { font-size: 13px; color: var(--muted); margin-bottom: 12px; font-weight: 500; }
+.bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
+.bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+.bar {
+  width: 100%; border-radius: 4px 4px 0 0;
+  background: var(--accent); opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.bar-lbl { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.distrib-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.distrib-item {
+  flex: 1; padding: 12px; border-radius: var(--radius-sm);
+  text-align: center;
+}
+.distrib-val { font-size: 20px; font-weight: 800; font-family: 'DM Mono', monospace; }
+.distrib-lbl { font-size: 11px; margin-top: 2px; opacity: 0.8; }
+.pr-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 14px;
+}
+.pr-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.pr-row:last-child { border-bottom: none; }
+.pr-name { font-size: 13px; }
+.pr-val { font-size: 14px; font-weight: 700; color: var(--accent); font-family: 'DM Mono', monospace; }
+.pr-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 13px; width: 100px; text-align: right; }
+
+/* RAPPELS */
+.notif-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.notif-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.notif-content { flex: 1; }
+.notif-title { font-size: 13px; font-weight: 700; }
+.notif-sub { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+.notif-time { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 4px; }
+.notif-toggle { display: flex; align-items: center; }
+.toggle { position: relative; width: 44px; height: 26px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0;
+  background: var(--surface2); border-radius: 13px;
+  border: 1px solid var(--border); cursor: pointer; transition: background 0.2s;
+}
+.toggle-slider::after {
+  content: ''; position: absolute;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--muted); top: 2px; left: 2px;
+  transition: all 0.2s;
+}
+.toggle input:checked + .toggle-slider { background: var(--accent); border-color: var(--accent); }
+.toggle input:checked + .toggle-slider::after { transform: translateX(18px); background: #0a0a0a; }
+
+/* EMPTY STATE */
+.empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-text { font-size: 14px; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: calc(var(--safe-bottom) + 20px); left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--accent); color: #0a0a0a;
+  padding: 12px 24px; border-radius: 30px;
+  font-size: 14px; font-weight: 700;
+  z-index: 9999; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="navbar">
+    <div class="logo">Sprint<span>X</span></div>
+    <div class="week-badge" id="week-badge">S1 / 18</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showPage('home', this)">Accueil</div>
+    <div class="tab" onclick="showPage('add', this)">+ Séance</div>
+    <div class="tab" onclick="showPage('calendar', this)">Calendrier</div>
+    <div class="tab" onclick="showPage('stats', this)">Stats</div>
+    <div class="tab" onclick="showPage('reminders', this)">Rappels</div>
+  </div>
+
+  <div class="content">
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="hero">
+        <div class="hero-title">Cette semaine</div>
+        <div class="stats-grid">
+          <div class="stat"><div class="stat-val" id="stat-seances">0</div><div class="stat-lbl">séances</div></div>
+          <div class="stat"><div class="stat-val" id="stat-temps">0h</div><div class="stat-lbl">volume</div></div>
+          <div class="stat"><div class="stat-val" id="stat-total">0</div><div class="stat-lbl">total séances</div></div>
+        </div>
+      </div>
+
+      <div class="prog-card" id="prog-card"></div>
+
+      <div class="section-label">Dernières séances</div>
+      <div class="session-list" id="recent-list">
+        <div class="empty"><div class="empty-icon">🏃</div><div class="empty-text">Aucune séance encore.<br>Lance-toi !</div></div>
+      </div>
+    </div>
+
+    <!-- ADD -->
+    <div class="page" id="page-add">
+      <div class="section-label">Nouvelle séance</div>
+      <div class="form-group">
+        <label>Type de séance</label>
+        <div class="type-grid">
+          <button class="type-btn" data-type="vitesse" onclick="selectType('vitesse', this)">Vitesse / Sprint</button>
+          <button class="type-btn" data-type="endurance" onclick="selectType('endurance', this)">Endurance</button>
+          <button class="type-btn" data-type="mixte" onclick="selectType('mixte', this)">Puissance mixte</button>
+          <button class="type-btn" data-type="compet" onclick="selectType('compet', this)">Simulation</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Titre</label>
+        <input type="text" id="f-title" placeholder="Ex: Sprints 30m + gammes ABC" />
+      </div>
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="f-date" />
+      </div>
+      <div class="form-group">
+        <label>Durée (minutes)</label>
+        <input type="number" id="f-duree" placeholder="60" min="1" max="300" />
+      </div>
+      <div class="form-group">
+        <label>Exercices / détail</label>
+        <input type="text" id="f-exercices" placeholder="Ex: 6×30m, 4×200m..." />
+      </div>
+      <div class="form-group">
+        <label>Effort ressenti (1–10)</label>
+        <div class="effort-selector" id="effort-selector"></div>
+      </div>
+      <div class="form-group">
+        <label>Notes libres</label>
+        <textarea id="f-notes" placeholder="Ressentis, conditions, observations..."></textarea>
+      </div>
+      <button class="submit-btn" onclick="saveSession()">Enregistrer la séance</button>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="page" id="page-calendar">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="changeMonth(-1)">&#8249;</button>
+        <div class="cal-month" id="cal-month-title"></div>
+        <button class="cal-nav" onclick="changeMonth(1)">&#8250;</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--vitesse)"></div>Vitesse</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--endurance)"></div>Endurance</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--mixte)"></div>Puissance</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--compet)"></div>Simulation</div>
+      </div>
+      <div style="margin-top:20px;">
+        <div class="section-label">Séances du mois</div>
+        <div class="session-list" id="cal-session-list"></div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="page" id="page-stats">
+      <div class="chart-card">
+        <div class="chart-title">Volume hebdomadaire (min)</div>
+        <div class="bar-chart" id="bar-chart"></div>
+      </div>
+      <div class="section-label">Répartition des types</div>
+      <div class="distrib-row" id="distrib-row"></div>
+      <div class="pr-card">
+        <div class="section-label" style="margin-bottom:8px;">Mes records personnels</div>
+        <div class="pr-row">
+          <div class="pr-name">100m</div>
+          <input class="pr-input" id="pr-100" type="text" placeholder="-- s" value="" onchange="savePR('100', this.value)" />
+        </div>
+        <div class="pr-row">
+          <div class="pr-name">1000m</div>
+          <input class="pr-input" id="pr-1000" type="text" placeholder="--:-- min" value="" onchange="savePR('1000', this.value)" />
+        </div>
+      </div>
+    </div>
+
+    <!-- RAPPELS -->
+    <div class="page" id="page-reminders">
+      <div class="section-label">Programme — Semaine en cours</div>
+      <div id="reminders-list"></div>
+      <div class="section-label" style="margin-top:20px;">Notifications</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5;">Active les rappels ci-dessous. Ton navigateur te demandera l'autorisation la première fois.</p>
+      <div id="notif-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PROGRAMME = [
+  {phase:1,label:'Fondations',weeks:[1,6],seances:[
+    {type:'vitesse',title:'Séance A — Vitesse',detail:'20 min échauffement technique (gammes ABC) · 6×30m accélération progressive 80-90% · 15 min gainage dynamique'},
+    {type:'endurance',title:'Séance B — Endurance',detail:'30-35 min footing aérobie · 5×200m allure 1000m cible (récup 90s trottée) · 15 min étirements'}
+  ]},
+  {phase:2,label:'Puissance',weeks:[7,12],seances:[
+    {type:'mixte',title:'Séance A — Puissance sprint',detail:'6×40m en côte légère + 4×60m plat à 95% · 4×80m résistance sprint (récup 5 min) · 15 min plyométrie'},
+    {type:'endurance',title:'Séance B — Spécifique 1000m',detail:'20 min footing progressif · 8×200m VMA (récup 60s trottée) · 1×600m test en fin de phase'}
+  ]},
+  {phase:3,label:'Affûtage',weeks:[13,18],seances:[
+    {type:'compet',title:'Séance A — Sprint maximal',detail:'8×départ arrêté 20m · 2×100m intensité maximale (récup 8-10 min) · 3×50m sprint relâché'},
+    {type:'compet',title:'Séance B — Simulation 1000m',detail:'2×500m allure objectif 1000m · 1×1000m compétition (semaine 16) · S17-18 : affûtage, volume ÷2'}
+  ]}
+];
+
+const NOTIFS_CONFIG = [
+  {id:'a',day:'Lundi',time:'07:30',title:'Séance A aujourd\'hui',sub:'Vitesse · sprints, gammes, gainage',type:'vitesse'},
+  {id:'b',day:'Jeudi',time:'07:30',title:'Séance B aujourd\'hui',sub:'Endurance · footing + fractionné 200m',type:'endurance'},
+  {id:'veille-a',day:'Dimanche',time:'20:00',title:'Rappel demain : Séance A',sub:'Prépare tes chaussures de sprint !',type:'vitesse'},
+  {id:'veille-b',day:'Mercredi',time:'20:00',title:'Rappel demain : Séance B',sub:'Allure footing calme demain matin',type:'endurance'},
+];
+
+let sessions = JSON.parse(localStorage.getItem('sprintx-sessions') || '[]');
+let notifState = JSON.parse(localStorage.getItem('sprintx-notifs') || '{}');
+let prs = JSON.parse(localStorage.getItem('sprintx-prs') || '{}');
+let selectedType = '';
+let selectedEffort = 0;
+let calDate = new Date();
+
+const startDate = new Date(localStorage.getItem('sprintx-start') || new Date().toISOString().split('T')[0]);
+if (!localStorage.getItem('sprintx-start')) {
+  localStorage.setItem('sprintx-start', startDate.toISOString().split('T')[0]);
+}
+
+function getCurrentWeek() {
+  const now = new Date();
+  const diff = Math.floor((now - startDate) / (7 * 24 * 3600 * 1000)) + 1;
+  return Math.min(Math.max(diff, 1), 18);
+}
+
+function getCurrentPhase(week) {
+  return PROGRAMME.find(p => week >= p.weeks[0] && week <= p.weeks[1]) || PROGRAMME[0];
+}
+
+function showPage(id, tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (tab) tab.classList.add('active');
+  if (id === 'home') renderHome();
+  if (id === 'calendar') renderCalendar();
+  if (id === 'stats') renderStats();
+  if (id === 'reminders') renderReminders();
+}
+
+function renderHome() {
+  const week = getCurrentWeek();
+  document.getElementById('week-badge').textContent = 'S' + week + ' / 18';
+  const now = new Date();
+  const weekStart = new Date(now); weekStart.setDate(now.getDate() - now.getDay() + 1);
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6);
+  const weekSessions = sessions.filter(s => {
+    const d = new Date(s.date); return d >= weekStart && d <= weekEnd;
+  });
+  document.getElementById('stat-seances').textContent = weekSessions.length;
+  const totalMin = weekSessions.reduce((a, s) => a + (parseInt(s.duree) || 0), 0);
+  document.getElementById('stat-temps').textContent = totalMin >= 60 ? Math.floor(totalMin/60) + 'h' + (totalMin%60 ? (totalMin%60)+'m' : '') : totalMin + 'min';
+  document.getElementById('stat-total').textContent = sessions.length;
+
+  const phase = getCurrentPhase(week);
+  const pc = document.getElementById('prog-card');
+  pc.innerHTML = `
+    <div class="prog-header">
+      <div class="prog-title">Programme S${week}</div>
+      <div class="prog-phase">Phase ${phase.phase} — ${phase.label}</div>
+    </div>
+    <div class="prog-seances">
+      ${phase.seances.map(s => `
+        <div class="prog-seance ${s.type}">
+          <div class="prog-seance-title">${s.title}</div>
+          <div class="prog-seance-detail">${s.detail}</div>
+        </div>
+      `).join('')}
+    </div>`;
+
+  const list = document.getElementById('recent-list');
+  const recent = [...sessions].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+  if (!recent.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">🏃</div><div class="empty-text">Aucune séance encore.<br>Lance-toi !</div></div>';
+    return;
+  }
+  list.innerHTML = recent.map(s => sessionCardHTML(s)).join('');
+}
+
+function sessionCardHTML(s) {
+  const dateStr = new Date(s.date).toLocaleDateString('fr-FR', {weekday:'short', day:'numeric', month:'short'});
+  const effortDots = Array.from({length:10}, (_,i) => {
+    const filled = i < s.effort;
+    const colors = {vitesse:'var(--vitesse)',endurance:'var(--endurance)',mixte:'var(--mixte)',compet:'var(--compet)'};
+    return `<div class="effort-dot" style="${filled ? 'background:' + (colors[s.type]||'var(--accent)') : ''}"></div>`;
+  }).join('');
+  const typeLabels = {vitesse:'Vitesse',endurance:'Endurance',mixte:'Puissance',compet:'Simulation'};
+  return `<div class="session-card ${s.type}">
+    <div class="session-top">
+      <div>
+        <div class="session-name">${s.title}</div>
+        <span class="session-tag tag-${s.type}">${typeLabels[s.type]||s.type}</span>
+      </div>
+      <div class="session-date">${dateStr}</div>
+    </div>
+    <div class="session-metrics">
+      ${s.duree ? `<div class="session-metric"><strong>${s.duree} min</strong> durée</div>` : ''}
+      ${s.exercices ? `<div class="session-metric"><strong>${s.exercices}</strong></div>` : ''}
+    </div>
+    ${s.effort ? `<div class="effort-bar">${effortDots}</div>` : ''}
+    ${s.notes ? `<div class="session-notes">${s.notes}</div>` : ''}
+  </div>`;
+}
+
+function selectType(type, btn) {
+  selectedType = type;
+  document.querySelectorAll('.type-btn').forEach(b => b.className = 'type-btn');
+  btn.className = 'type-btn selected-' + type;
+}
+
+function buildEffortSelector() {
+  const el = document.getElementById('effort-selector');
+  el.innerHTML = Array.from({length:10}, (_,i) => `
+    <button class="effort-btn" data-v="${i+1}" onclick="selectEffort(${i+1}, this)">${i+1}</button>
+  `).join('');
+}
+
+function selectEffort(v, btn) {
+  selectedEffort = v;
+  document.querySelectorAll('.effort-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function saveSession() {
+  const title = document.getElementById('f-title').value.trim();
+  const date = document.getElementById('f-date').value;
+  const duree = document.getElementById('f-duree').value;
+  if (!title || !date || !selectedType) { showToast('Remplis au moins type, titre et date !'); return; }
+  const s = {
+    id: Date.now(),
+    type: selectedType,
+    title, date, duree,
+    exercices: document.getElementById('f-exercices').value.trim(),
+    effort: selectedEffort,
+    notes: document.getElementById('f-notes').value.trim()
+  };
+  sessions.unshift(s);
+  localStorage.setItem('sprintx-sessions', JSON.stringify(sessions));
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-date').value = '';
+  document.getElementById('f-duree').value = '';
+  document.getElementById('f-exercices').value = '';
+  document.getElementById('f-notes').value = '';
+  selectedType = ''; selectedEffort = 0;
+  document.querySelectorAll('.type-btn').forEach(b => b.className = 'type-btn');
+  document.querySelectorAll('.effort-btn').forEach(b => b.classList.remove('selected'));
+  showToast('Séance enregistrée !');
+  showPage('home', document.querySelector('.tab'));
+  document.querySelectorAll('.tab')[0].classList.add('active');
+}
+
+function renderCalendar() {
+  const year = calDate.getFullYear();
+  const month = calDate.getMonth();
+  document.getElementById('cal-month-title').textContent =
+    calDate.toLocaleDateString('fr-FR', {month:'long', year:'numeric'}).replace(/^\w/, c => c.toUpperCase());
+  const grid = document.getElementById('cal-grid');
+  const days = ['Lu','Ma','Me','Je','Ve','Sa','Di'];
+  let html = days.map(d => `<div class="cal-day-header">${d}</div>`).join('');
+  const firstDay = new Date(year, month, 1).getDay();
+  const offset = (firstDay === 0 ? 6 : firstDay - 1);
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const daysInPrev = new Date(year, month, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const sessionMap = {};
+  sessions.forEach(s => { sessionMap[s.date] = (sessionMap[s.date] || []); sessionMap[s.date].push(s); });
+  for (let i = 0; i < offset; i++) {
+    const d = daysInPrev - offset + 1 + i;
+    html += `<div class="cal-day other-month">${d}</div>`;
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const daySessions = sessionMap[dateStr] || [];
+    const dayDate = new Date(year, month, d);
+    const isToday = dayDate.getTime() === today.getTime();
+    const type = daySessions.length ? daySessions[0].type : '';
+    const cls = ['cal-day', type, isToday ? 'today' : '', daySessions.length ? 'has-session' : ''].filter(Boolean).join(' ');
+    html += `<div class="${cls}" title="${daySessions.map(s=>s.title).join(', ')}">${d}</div>`;
+  }
+  grid.innerHTML = html;
+  const monthSessions = sessions.filter(s => {
+    const d = new Date(s.date);
+    return d.getFullYear() === year && d.getMonth() === month;
+  }).sort((a,b) => new Date(b.date) - new Date(a.date));
+  const sl = document.getElementById('cal-session-list');
+  sl.innerHTML = monthSessions.length ? monthSessions.map(s => sessionCardHTML(s)).join('') : '<div class="empty"><div class="empty-text">Aucune séance ce mois-ci</div></div>';
+}
+
+function changeMonth(dir) {
+  calDate.setMonth(calDate.getMonth() + dir);
+  renderCalendar();
+}
+
+function renderStats() {
+  const last8 = [];
+  const now = new Date();
+  for (let i = 7; i >= 0; i--) {
+    const wStart = new Date(now); wStart.setDate(now.getDate() - now.getDay() + 1 - i*7);
+    const wEnd = new Date(wStart); wEnd.setDate(wStart.getDate() + 6);
+    const total = sessions.filter(s => { const d=new Date(s.date); return d>=wStart && d<=wEnd; }).reduce((a,s) => a+(parseInt(s.duree)||0),0);
+    last8.push({label: 'S-'+(7-i), val: total});
+  }
+  const maxVal = Math.max(...last8.map(w=>w.val), 1);
+  const barChart = document.getElementById('bar-chart');
+  barChart.innerHTML = last8.map(w => `
+    <div class="bar-wrap">
+      <div class="bar" style="height:${Math.round((w.val/maxVal)*100)}%;opacity:${w.val?'0.85':'0.2'}"></div>
+      <div class="bar-lbl">${w.label}</div>
+    </div>`).join('');
+  const counts = {vitesse:0,endurance:0,mixte:0,compet:0};
+  sessions.forEach(s => { if(counts[s.type]!==undefined) counts[s.type]++; });
+  const total = sessions.length || 1;
+  const colors = {vitesse:'var(--vitesse)',endurance:'var(--endurance)',mixte:'var(--mixte)',compet:'var(--compet)'};
+  const labels = {vitesse:'Vitesse',endurance:'Endurance',mixte:'Puissance',compet:'Simulation'};
+  document.getElementById('distrib-row').innerHTML = Object.entries(counts).map(([type,count]) => `
+    <div class="distrib-item" style="background:var(--${type}-bg)">
+      <div class="distrib-val" style="color:${colors[type]}">${count}</div>
+      <div class="distrib-lbl" style="color:${colors[type]}">${labels[type]}</div>
+    </div>`).join('');
+  const savedPRs = JSON.parse(localStorage.getItem('sprintx-prs') || '{}');
+  document.getElementById('pr-100').value = savedPRs['100'] || '';
+  document.getElementById('pr-1000').value = savedPRs['1000'] || '';
+}
+
+function savePR(key, val) {
+  const p = JSON.parse(localStorage.getItem('sprintx-prs') || '{}');
+  p[key] = val; localStorage.setItem('sprintx-prs', JSON.stringify(p));
+  showToast('Record enregistré !');
+}
+
+function renderReminders() {
+  const week = getCurrentWeek();
+  const phase = getCurrentPhase(week);
+  document.getElementById('reminders-list').innerHTML = phase.seances.map(s => `
+    <div class="notif-card">
+      <div class="notif-dot" style="background:var(--${s.type})"></div>
+      <div class="notif-content">
+        <div class="notif-title">${s.title}</div>
+        <div class="notif-sub">${s.detail.split('·')[0].trim()}</div>
+      </div>
+    </div>`).join('');
+  const saved = JSON.parse(localStorage.getItem('sprintx-notifs') || '{}');
+  document.getElementById('notif-list').innerHTML = NOTIFS_CONFIG.map(n => `
+    <div class="notif-card">
+      <div class="notif-dot" style="background:var(--${n.type})"></div>
+      <div class="notif-content">
+        <div class="notif-title">${n.title}</div>
+        <div class="notif-sub">${n.sub}</div>
+        <div class="notif-time">${n.day} à ${n.time}</div>
+      </div>
+      <div class="notif-toggle">
+        <label class="toggle">
+          <input type="checkbox" ${saved[n.id] ? 'checked' : ''} onchange="toggleNotif('${n.id}', this.checked)" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>`).join('');
+}
+
+function toggleNotif(id, enabled) {
+  const saved = JSON.parse(localStorage.getItem('sprintx-notifs') || '{}');
+  saved[id] = enabled;
+  localStorage.setItem('sprintx-notifs', JSON.stringify(saved));
+  if (enabled && 'Notification' in window) {
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') showToast('Rappel activé !');
+      else showToast('Autorise les notifications dans Safari');
+    });
+  } else {
+    showToast('Rappel désactivé');
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function init() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('f-date').value = today;
+  buildEffortSelector();
+  renderHome();
+}
+
+init();
+</script>
+</body>
+</html>
